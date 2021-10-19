@@ -1,19 +1,34 @@
 //Importée Express
 const express = require("express");
 const server = express();
+const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const apiRouter = require("./apiRouter").router;
 //Configuration des routes
 
+//CORS
+server.use((req, res, next) => {
+  //accéder à notre API depuis n'importe quelle origine ( '*' )
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  //ajouter les headers mentionnés aux requêtes envoyées vers notre API
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
+  );
+  //envoyer des requêtes avec les méthodes mentionnées
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  next();
+});
+
+/*Helmet aide à sécuriser les applications Express 
+en définissant divers en-têtes HTTP*/
+server.use(helmet());
+
 server.use(express.urlencoded({ extended: true }));
 server.use(express.json());
-
-//Get pour récupérée des information
-server.get("/", function (req, res) {
-  //En-tete de ma requete reponse HTTP
-  res.setHeader("Content-Type", "text/html");
-  resr.status(200).send("<h1>Serveur en marche</h1>");
-});
 
 server.use("/api/", apiRouter);
 //Ecoute du serveur

@@ -79,8 +79,8 @@ module.exports = {
     //Permet de definire un ordre pour affichée les messages
     const order = req.query.order;
 
-    if (limit > ITEMS_LIMIT) {
-      limit = ITEMS_LIMIT;
+    if (limit > 2) {
+      limit = 5;
     }
     //FindAll permet de recupérés tous les messages
     models.Message.findAll({
