@@ -43,56 +43,62 @@ module.exports = {
       });
     }
 
+    //Waterfall permet d'avoir des fonction en cascade
     asyncLib.waterfall(
       [
         function (done) {
-          done(null, "variable1");
+          models.User.findOne({
+            attributes: ["email"],
+            where: { email: email },
+          })
+            //Verifiée si l'email existe pas dans la BDD
+            .then(function (userFound) {
+              done(null, userFound);
+            })
+            .catch(function (err) {
+              return res.status(500).json({
+                error: "Impossible de verifié si l'utilisateur existe",
+              });
+            });
+        },
+        function (userFound, done) {
+          if (!userFound) {
+            bcrypt.hash(password, 5, function (err, bcryptedPassword) {
+              done(null, userFound, bcryptedPassword);
+            });
+          } else {
+            return res.status(409).json({
+              error: "L'utilisateur est deja existant dans la Base de donnée",
+            });
+          }
+        },
+        function (userFound, bcryptedPassword, done) {
+          const newUser = models.User.create({
+            email: email,
+            username: username,
+            password: bcryptedPassword,
+            isAdmin: 0,
+          })
+            .then(function (newUser) {
+              done(newUser);
+            })
+            .catch(function (err) {
+              return res.status(500).json({ error: "cannot add user" });
+            });
         },
       ],
-      function (err) {
-        if (!err) {
-          return res.status(200).json({ msg: "ok" });
+      function (newUser) {
+        if (newUser) {
+          return res.status(201).json({
+            userId: newUser.id,
+          });
         } else {
-          return res.status(404).json({ error: "error" });
+          return res.status(500).json({ error: "cannot add user" });
         }
       }
     );
-
-    //Verifiée si l'email existe pas dans la BDD
-    models.User.findOne({
-      attributes: ["email"],
-      where: { email: email },
-    })
-      .then(function (userFound) {
-        if (!userFound) {
-          bcrypt.hash(password, 5, function (err, bcryptedPassword) {
-            const newUser = models.User.create({
-              email: email,
-              username: username,
-              password: bcryptedPassword,
-              isAdmin: 0,
-            })
-              .then(function (newUser) {
-                return res.status(201).json({
-                  userId: newUser.id,
-                });
-              })
-              .catch(function (err) {
-                return res.status(500).json({ error: "cannot add user" });
-              });
-          });
-        } else {
-          return res.status(409).json({
-            error: "L'utilisateur est deja existant dans la Base de donnée",
-          });
-        }
-      })
-      .catch(function (err) {
-        return res
-          .status(500)
-          .json({ error: "Impossible de verifié si l'utilisateur existe" });
-      });
   },
+
   login: function (req, res) {
     const email = req.body.email;
     const password = req.body.password;
@@ -101,37 +107,80 @@ module.exports = {
       return res.status(400).json({ error: "missing parametre" });
     }
 
-    //ICI PLACEE LES REGEX
-    //Vérifiée si un utilisateur existe avec cette email
-    models.User.findOne({
-      where: { email: email },
-    })
-      .then(function (userFound) {
-        if (userFound) {
-          bcrypt.compare(
-            password,
-            userFound.password,
-            function (errBycrypt, resBycrypt) {
-              if (resBycrypt) {
-                return res.status(200).json({
-                  userId: userFound.id,
-                  token: jwtUtils.generateTokenForUser(userFound),
-                });
-              } else {
-                return res.status(403).json({ error: "Password invalide!" });
+    asyncLib.waterfall(
+      [
+        function (done) {
+          //Vérifiée si un utilisateur existe avec cette email
+          models.User.findOne({
+            where: { email: email },
+          })
+            .then(function (userFound) {
+              done(null, userFound);
+            })
+            .catch(function (err) {
+              return res.status(500).json({
+                error: "Impossible de verifié si l'utilisateur existe",
+              });
+            });
+        },
+        function (userFound, done) {
+          if (userFound) {
+            bcrypt.compare(
+              password,
+              userFound.password,
+              function (errBycrypt, resBycrypt) {
+                done(null, userFound, resBycrypt);
               }
-            }
-          );
-        } else {
-          return res.status(400).json({
-            error: "L'utilisateur n'existe pas dans la base de donée",
+            );
+          } else {
+            return res.status(404).json({
+              error: "L'utilisateur n'existe pas dans la base de donnée",
+            });
+          }
+        },
+        function (userFound, resBycrypt, done) {
+          if (resBycrypt) {
+            done(userFound);
+          } else {
+            return res.status(403).json({ error: "Password invalide!" });
+          }
+        },
+      ],
+      function (userFound) {
+        if (userFound) {
+          return res.status(201).json({
+            userId: userFound.id,
+            token: jwtUtils.generateTokenForUser(userFound),
           });
+        } else {
+          return res
+            .status(500)
+            .json({ error: "Impossible de verifié si l'utilisateur existe" });
+        }
+      }
+    );
+  },
+  //Permet de recup et modifier notre profile
+  getUserProfile: function (req, res) {
+    // en-tete de recuperation de nos autorisation
+    var headerAuth = req.headers["authorization"];
+    var userId = jwtUtils.getUserId(headerAuth);
+    //si le token et invalide envoie une erreur
+    if (userId < 0) return res.status(400).json({ error: "wrong token" });
+
+    models.User.findOne({
+      attributes: ["id", "email", "username"],
+      where: { id: userId },
+    })
+      .then(function (user) {
+        if (user) {
+          res.status(201).json(user);
+        } else {
+          res.status(404).json({ error: "user not found" });
         }
       })
       .catch(function (err) {
-        return res
-          .status(500)
-          .json({ error: "Impossible de verifié si l'utilisateur existe" });
+        res.status(500).json({ error: "cannot fetch user" });
       });
   },
 };
