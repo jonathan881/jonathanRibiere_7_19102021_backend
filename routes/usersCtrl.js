@@ -21,7 +21,7 @@ module.exports = {
     const password = req.body.password;
 
     if (email == null || username == null || password == null) {
-      return res.status(400).json({ error: "missing parameters" });
+      return res.status(400).json({ error: "Paramètre manquant" });
     }
 
     if (username.length >= 15 || username.length <= 2) {
@@ -83,7 +83,9 @@ module.exports = {
               done(newUser);
             })
             .catch(function (err) {
-              return res.status(500).json({ error: "cannot add user" });
+              return res
+                .status(500)
+                .json({ error: "Impossible de trouvée l'utilisateur" });
             });
         },
       ],
@@ -93,7 +95,9 @@ module.exports = {
             userId: newUser.id,
           });
         } else {
-          return res.status(500).json({ error: "cannot add user" });
+          return res
+            .status(500)
+            .json({ error: "Impossible de trouvée l'utilisateur" });
         }
       }
     );
@@ -104,7 +108,7 @@ module.exports = {
     const password = req.body.password;
 
     if (email == null || password == null) {
-      return res.status(400).json({ error: "missing parametre" });
+      return res.status(400).json({ error: "Paramètre manquant!" });
     }
 
     asyncLib.waterfall(
@@ -166,7 +170,7 @@ module.exports = {
     var headerAuth = req.headers["authorization"];
     var userId = jwtUtils.getUserId(headerAuth);
     //si le token et invalide envoie une erreur
-    if (userId < 0) return res.status(400).json({ error: "wrong token" });
+    if (userId < 0) return res.status(400).json({ error: "erreur token" });
 
     models.User.findOne({
       attributes: ["id", "email", "username"],
@@ -176,11 +180,13 @@ module.exports = {
         if (user) {
           res.status(201).json(user);
         } else {
-          res.status(404).json({ error: "user not found" });
+          res.status(404).json({ error: "Utilisateur non trouvé!" });
         }
       })
       .catch(function (err) {
-        res.status(500).json({ error: "cannot fetch user" });
+        res
+          .status(500)
+          .json({ error: "Impossible de récupérer l'utilisateur" });
       });
   },
 };
