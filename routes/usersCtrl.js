@@ -189,4 +189,58 @@ module.exports = {
           .json({ error: "Impossible de récupérer l'utilisateur" });
       });
   },
+  updateUserProfile: function (req, res) {
+    // Getting auth header
+    const headerAuth = req.headers["authorization"];
+    const userId = jwtUtils.getUserId(headerAuth);
+
+    // Params
+    const username = req.body.username;
+
+    asyncLib.waterfall(
+      [
+        function (done) {
+          models.User.findOne({
+            attributes: ["id", "username"],
+            where: { id: userId },
+          })
+            .then(function (userFound) {
+              done(null, userFound);
+            })
+            .catch(function (err) {
+              return res
+                .status(500)
+                .json({ error: "Impossible de vérifié l'utilisateur" });
+            });
+        },
+        function (userFound, done) {
+          if (userFound) {
+            userFound
+              .update({
+                bio: username ? username : userFound.username,
+              })
+              .then(function () {
+                done(userFound);
+              })
+              .catch(function (err) {
+                res
+                  .status(500)
+                  .json({ error: "Impossible de modifiée le pseudo" });
+              });
+          } else {
+            res.status(404).json({ error: "Utilisateur inexistant" });
+          }
+        },
+      ],
+      function (userFound) {
+        if (userFound) {
+          return res.status(201).json(userFound);
+        } else {
+          return res
+            .status(500)
+            .json({ error: "Impossible de chargée le profile" });
+        }
+      }
+    );
+  },
 };

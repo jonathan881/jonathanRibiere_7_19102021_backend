@@ -3,6 +3,11 @@ var models = require("../models");
 var asyncLib = require("async");
 var jwtUtils = require("../utils/jwt.utils");
 
+// Constants global
+const TITLE_LIMIT = 2;
+const CONTENT_LIMIT = 4;
+const ITEMS_LIMIT = 50;
+
 // Routes
 module.exports = {
   //Fonction qui permet de créer un message
@@ -16,10 +21,10 @@ module.exports = {
     var content = req.body.content;
     //Pour s'assurée que les champs ne sont pas vide
     if (title == null || content == null) {
-      return res.status(400).json({ error: "Paramètre manquant!" });
+      return res.status(400).json({ error: "Paramètre  manquant!" });
     }
     //Pour limitté le nombre de caractère et s'assurée d'un minimume
-    if (title.length <= 3 || content.length <= 15) {
+    if (title.length <= TITLE_LIMIT || content.length <= CONTENT_LIMIT) {
       return res.status(400).json({ error: "Paramètre Invalide!" });
     }
 
@@ -48,6 +53,7 @@ module.exports = {
             models.Message.create({
               title: title,
               content: content,
+              attachment: attachment,
               likes: 0,
               UserId: userFound.id,
             }).then(function (newMessage) {
@@ -79,9 +85,10 @@ module.exports = {
     //Permet de definire un ordre pour affichée les messages
     const order = req.query.order;
 
-    if (limit > 2) {
-      limit = 5;
+    if (limit > ITEMS_LIMIT) {
+      limit = ITEMS_LIMIT;
     }
+
     //FindAll permet de recupérés tous les messages
     models.Message.findAll({
       //On s'assure que les donnée sont pas null
