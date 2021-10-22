@@ -1,7 +1,7 @@
 const express = require("express");
 const usersCtrl = require("./routes/usersCtrl");
 const messagesCtrl = require("./routes/messagesCtrl");
-const multer = require("./");
+//const multer = require("./middlewares/multer-config");
 
 //Router
 exports.router = (function () {
@@ -14,7 +14,7 @@ exports.router = (function () {
   apiRouter.route("/users/profile/").put(usersCtrl.updateUserProfile);
 
   //Routes pour les Messages
-  apiRouter.route("/messages/new/", multer).post(messagesCtrl.createMessage);
+  apiRouter.route("/messages/new/").post(messagesCtrl.createMessage);
   apiRouter.route("/messages/").get(messagesCtrl.listMessages);
   return apiRouter;
 })();
