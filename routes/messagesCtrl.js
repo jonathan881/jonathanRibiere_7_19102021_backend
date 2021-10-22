@@ -13,20 +13,20 @@ module.exports = {
   //Fonction qui permet de créer un message
   createMessage: function (req, res) {
     // Pour l'auth du token
-    var headerAuth = req.headers["authorization"];
-    var userId = jwtUtils.getUserId(headerAuth);
+    let headerAuth = req.headers["authorization"];
+    let userId = jwtUtils.getUserId(headerAuth);
 
     // Paramètre
-    var title = req.body.title;
-    var content = req.body.content;
+    let title = req.body.title;
+    let content = req.body.content;
     //Pour s'assurée que les champs ne sont pas vide
-    if (title == null || content == null) {
-      return res.status(400).json({ error: "Paramètre  manquant!" });
-    }
+    //if (title == null || content == null) {
+    //return res.status(400).json({ error: "Paramètre  manquant!" });
+    //}
     //Pour limitté le nombre de caractère et s'assurée d'un minimume
-    if (title.length <= TITLE_LIMIT || content.length <= CONTENT_LIMIT) {
-      return res.status(400).json({ error: "Paramètre Invalide!" });
-    }
+    // if (title.length <= TITLE_LIMIT || content.length <= CONTENT_LIMIT) {
+    //return res.status(400).json({ error: "Paramètre Invalide!" });
+    // }
 
     //La mise en place d'un Waterfall permet de simplifié les chose
     asyncLib.waterfall(
@@ -53,8 +53,8 @@ module.exports = {
             models.Message.create({
               title: title,
               content: content,
-              attachment: attachment,
-              likes: 0,
+              // attachment: attachment,
+              // likes: 0,
               UserId: userFound.id,
             }).then(function (newMessage) {
               done(newMessage);
