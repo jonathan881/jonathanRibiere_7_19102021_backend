@@ -18,6 +18,7 @@ module.exports = {
 
     // Paramètre
     let title = req.body.title;
+    let attachment = req.body.file;
     let content = req.body.content;
     //Pour s'assurée que les champs ne sont pas vide
     //if (title == null || content == null) {
@@ -53,7 +54,7 @@ module.exports = {
             models.Message.create({
               title: title,
               content: content,
-              // attachment: attachment,
+              attachment: attachment,
               // likes: 0,
               UserId: userFound.id,
             }).then(function (newMessage) {
