@@ -10,8 +10,8 @@ exports.router = (function () {
   //Routes des utilisateurs
   apiRouter.route("/users/register/").post(usersCtrl.register);
   apiRouter.route("/users/login/").post(usersCtrl.login);
-  apiRouter.route("/users/profile/:id").get(usersCtrl.getUserProfile);
-  apiRouter.route("/users/profile/:id").delete(usersCtrl.deleteProfile);
+  apiRouter.route("/users/profile/").get(usersCtrl.getUserProfile);
+  apiRouter.route("/users/profile/").delete(usersCtrl.deleteProfile);
 
   //Routes pour les Messages
   apiRouter.route("/messages/new/").post(multer, messagesCtrl.createMessage);
