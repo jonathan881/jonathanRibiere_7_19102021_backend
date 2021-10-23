@@ -189,58 +189,38 @@ module.exports = {
           .json({ error: "Impossible de récupérer l'utilisateur" });
       });
   },
-  updateUserProfile: function (req, res) {
-    // Getting auth header
-    const headerAuth = req.headers["authorization"];
-    const userId = jwtUtils.getUserId(headerAuth);
 
-    // Params
-    const username = req.body.username;
-
-    asyncLib.waterfall(
-      [
-        function (done) {
-          models.User.findOne({
-            attributes: ["id", "username"],
-            where: { id: userId },
+  deleteProfile: function (req, res) {
+    //récupération de l'id de l'user
+    let userId = jwtUtils.getUserId(req.headers.authorization);
+    if (userId != null) {
+      //Recherche sécurité si user existe bien
+      models.User.findOne({
+        where: { id: userId },
+      }).then((user) => {
+        if (user != null) {
+          //Delete de tous les posts de l'user même s'il y en a pas
+          models.Message.destroy({
+            where: { userId: user.id },
           })
-            .then(function (userFound) {
-              done(null, userFound);
+            .then(() => {
+              console.log("Tous les posts de cet user ont été supprimé");
+              //Suppression de l'utilisateur
+              models.User.destroy({
+                where: { id: user.id },
+              })
+                .then(() => res.end())
+                .catch((err) => console.log(err));
             })
-            .catch(function (err) {
-              return res
-                .status(500)
-                .json({ error: "Impossible de vérifié l'utilisateur" });
-            });
-        },
-        function (userFound, done) {
-          if (userFound) {
-            userFound
-              .update({
-                bio: username ? username : userFound.username,
-              })
-              .then(function () {
-                done(userFound);
-              })
-              .catch(function (err) {
-                res
-                  .status(500)
-                  .json({ error: "Impossible de modifiée le pseudo" });
-              });
-          } else {
-            res.status(404).json({ error: "Utilisateur inexistant" });
-          }
-        },
-      ],
-      function (userFound) {
-        if (userFound) {
-          return res.status(201).json(userFound);
+            .catch((err) => res.status(500).json(err));
         } else {
-          return res
-            .status(500)
-            .json({ error: "Impossible de chargée le profile" });
+          res.status(401).json({ error: "Cet user n'existe pas" });
         }
-      }
-    );
+      });
+    } else {
+      res.status(500).json({
+        error: "Impossible de supprimer ce compte, contacter un administrateur",
+      });
+    }
   },
 };
