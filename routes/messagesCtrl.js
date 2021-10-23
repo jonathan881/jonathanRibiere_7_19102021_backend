@@ -55,7 +55,7 @@ module.exports = {
               title: title,
               content: content,
               attachment: attachment,
-              // likes: 0,
+              likes: null,
               UserId: userFound.id,
             }).then(function (newMessage) {
               done(newMessage);
