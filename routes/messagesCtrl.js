@@ -55,13 +55,12 @@ module.exports = {
               title: title,
               content: content,
               attachment: attachment,
-              likes: null,
               UserId: userFound.id,
             }).then(function (newMessage) {
               done(newMessage);
             });
           } else {
-            res.status(404).json({ error: "Utilisateur non trouvé!" });
+            res.status(404).json({ error: "Utilisateur aaaa non trouvé!" });
           }
         },
       ],
@@ -115,6 +114,7 @@ module.exports = {
         }
       })
       .catch(function (err) {
+        console.log(err);
         res.status(500).json({ error: "invalid fields" });
       });
   },

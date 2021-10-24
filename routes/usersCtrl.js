@@ -204,6 +204,7 @@ module.exports = {
             where: { userId: user.id },
           })
             .then(() => {
+              console.log("Tous les posts de cet user ont été supprimé");
               //Suppression de l'utilisateur
               models.User.destroy({
                 where: { id: user.id },
