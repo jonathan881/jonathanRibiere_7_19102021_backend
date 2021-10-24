@@ -4,7 +4,7 @@ const multer = require("multer");
 // Récupération des MIME TYPES pour en extraire les extentions
 const MIME_TYPES = {
   "image/jpg": "jpg",
-  "image/jpeg": "jpg",
+  "image/jpeg": "jpeg",
   "image/png": "png",
   "image/gif": "gif",
 };
@@ -26,4 +26,4 @@ const storage = multer.diskStorage({
   },
 });
 
-module.exports = multer({ storage: storage }).single("image");
+module.exports = multer({ storage: storage }).single("images");
