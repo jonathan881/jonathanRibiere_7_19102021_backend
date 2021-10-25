@@ -1,12 +1,15 @@
 const express = require("express");
 const usersCtrl = require("./routes/usersCtrl");
 const messagesCtrl = require("./routes/messagesCtrl");
-const multer = require("./middlewares/multer-config");
+const path = require("path");
+const multer = require("./middleware/multer-config");
 
 //Router
 exports.router = (function () {
   const apiRouter = express.Router();
-
+  apiRouter.use("/images", express.static(path.join(__dirname, "images")));
+  apiRouter.get("/api/images/test.jpg");
+  console.log(path.join(__dirname, "images"));
   //Routes des utilisateurs
   apiRouter.route("/users/register/").post(usersCtrl.register);
   apiRouter.route("/users/login/").post(usersCtrl.login);
@@ -17,5 +20,6 @@ exports.router = (function () {
   //Routes pour les Messages
   apiRouter.route("/messages/new/").post(multer, messagesCtrl.createMessage);
   apiRouter.route("/messages/").get(messagesCtrl.listMessages);
+
   return apiRouter;
 })();

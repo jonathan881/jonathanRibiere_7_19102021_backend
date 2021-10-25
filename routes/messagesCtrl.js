@@ -18,8 +18,9 @@ module.exports = {
 
     // Paramètre
     let title = req.body.title;
-    let attachment = req.body.file;
+    let attachment = req.file;
     let content = req.body.content;
+    console.log(attachment);
     //Pour s'assurée que les champs ne sont pas vide
     //if (title == null || content == null) {
     //return res.status(400).json({ error: "Paramètre  manquant!" });
@@ -43,6 +44,7 @@ module.exports = {
               done(null, userFound);
             })
             .catch(function (err) {
+              console.log(err);
               return res
                 .status(500)
                 .json({ error: "impossible de vérifier l'utilisateur" });
@@ -54,7 +56,11 @@ module.exports = {
             models.Message.create({
               title: title,
               content: content,
-              attachment: attachment,
+              attachment: req.file
+                ? `${req.protocol}://${req.get("host")}/api/images/${
+                    req.file.filename
+                  }`
+                : "",
               UserId: userFound.id,
             }).then(function (newMessage) {
               done(newMessage);
