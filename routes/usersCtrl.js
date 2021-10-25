@@ -213,13 +213,13 @@ module.exports = {
     let userId = jwtUtils.getUserId(headerAuth);
 
     // Params
-    let username = req.body.username;
+    let password = req.body.password;
 
     asyncLib.waterfall(
       [
         function (done) {
           models.User.findOne({
-            attributes: ["id", "username"],
+            attributes: ["id", "password"],
             where: { id: userId },
           })
             .then(function (userFound) {
@@ -233,7 +233,7 @@ module.exports = {
           if (userFound) {
             userFound
               .update({
-                username: username ? username : userFound.username,
+                password: password ? password : userFound.password,
               })
               .then(function () {
                 done(userFound);
