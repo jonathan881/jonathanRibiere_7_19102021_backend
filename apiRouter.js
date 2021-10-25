@@ -10,6 +10,7 @@ exports.router = (function () {
   apiRouter.use("/images", express.static(path.join(__dirname, "images")));
   apiRouter.get("/api/images/test.jpg");
   console.log(path.join(__dirname, "images"));
+
   //Routes des utilisateurs
   apiRouter.route("/users/register/").post(usersCtrl.register);
   apiRouter.route("/users/login/").post(usersCtrl.login);
