@@ -3,11 +3,6 @@ const jwtUtils = require("../utils/jwt.utils");
 const models = require("../models");
 const asyncLib = require("async");
 
-//Constants
-const EMAIL_REGEX = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/;
-
-const PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{4,12}$/;
-
 //-----------------ROUTES------------------------//
 
 module.exports = {
@@ -18,13 +13,9 @@ module.exports = {
     const password = req.body.password;
 
     if (email == null || username == null || password == null) {
-      return res.status(400).json({ error: "Paramètre manquant" });
-    }
-
-    if (username.length >= 15 || username.length <= 2) {
       return res
         .status(400)
-        .json({ error: "Le mdp dois contenire entre 3 et 14 caractères" });
+        .json({ error: "Veuillez renseigner tous les champs requis" });
     }
 
     //Waterfall permet d'avoir des fonction en cascade
