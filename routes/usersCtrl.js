@@ -198,52 +198,31 @@ module.exports = {
       });
     }
   },
+  //Modification du profil de l'utilisateur
   updateUserProfile: function (req, res) {
-    // Getting auth header
-    let headerAuth = req.headers["authorization"];
-    let userId = jwtUtils.getUserId(headerAuth);
+    // Récupérer l'id utilisateur
+    let userId = jwtUtils.getUserId(req.headers.authorization);
+    // Récupérer les inputs utilisateur dans le body
+    const username = req.body.username;
 
-    // Params
-    let password = req.body.password;
-
-    asyncLib.waterfall(
-      [
-        function (done) {
-          models.User.findOne({
-            attributes: ["id", "password"],
-            where: { id: userId },
+    // Trouver l'utulisateur qui correspond au token
+    models.User.findOne({
+      attributes: ["id", "username"],
+      where: { id: userId },
+    })
+      // Modifier les informations renseignées par l'utilisateur
+      .then((user) => {
+        user
+          .update({
+            username: username ? username : user.username,
           })
-            .then(function (userFound) {
-              done(null, userFound);
-            })
-            .catch(function (err) {
-              return res.status(500).json({ error: "unable to verify user" });
-            });
-        },
-        function (userFound, done) {
-          if (userFound) {
-            userFound
-              .update({
-                password: password ? password : userFound.password,
-              })
-              .then(function () {
-                done(userFound);
-              })
-              .catch(function (err) {
-                res.status(500).json({ error: "cannot update user" });
-              });
-          } else {
-            res.status(404).json({ error: "user not found" });
-          }
-        },
-      ],
-      function (userFound) {
-        if (userFound) {
-          return res.status(201).json(userFound);
-        } else {
-          return res.status(500).json({ error: "cannot update user profile" });
-        }
-      }
-    );
+          .then(() =>
+            res
+              .status(201)
+              .json({ confirmation: "Le profil est modifié avec succès !" })
+          )
+          .catch((err) => res.status(500).json(err));
+      })
+      .catch((err) => json(err));
   },
 };
