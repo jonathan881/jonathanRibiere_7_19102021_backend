@@ -129,6 +129,8 @@ module.exports = {
         if (userFound) {
           return res.status(201).json({
             userId: userFound.id,
+            isAdmin: userFound.isAdmin,
+            username: userFound.username,
             token: jwtUtils.generateTokenForUser(userFound),
           });
         } else {
@@ -207,7 +209,7 @@ module.exports = {
 
     // Trouver l'utulisateur qui correspond au token
     models.User.findOne({
-      attributes: ["id", "username"],
+      attributes: ["id", "id"],
       where: { id: userId },
     })
       // Modifier les informations renseignées par l'utilisateur
