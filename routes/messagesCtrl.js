@@ -98,7 +98,7 @@ module.exports = {
     //FindAll permet de recupérés tous les messages
     models.Message.findAll({
       //On s'assure que les donnée sont pas null
-      order: [order != null ? order.split(":") : ["title", "ASC"]],
+      order: [order != null ? order.split(":") : ["createdAt", "DESC"]],
       attributes: fields !== "*" && fields != null ? fields.split(",") : null,
       limit: !isNaN(limit) ? limit : null,
       offset: !isNaN(offset) ? offset : null,
@@ -123,5 +123,55 @@ module.exports = {
         console.log(err);
         res.status(500).json({ error: "invalid fields" });
       });
+  },
+
+  // Permet de supprimer un message
+  deleteMessage: function (req, res) {
+    models.Message.findOne({
+      attributes: ["id"],
+      where: { id: req.params.id },
+    })
+      .then((messages) => {
+        if (messages) {
+          if (messages.attachment != null) {
+            const filename = messages.attachment.split("/images/")[1];
+
+            fs.unlink(`images/${filename}`, () => {
+              models.Message.destroy({
+                where: { id: req.params.id },
+              })
+                .then(() =>
+                  res
+                    .status(200)
+                    .json({ message: "Votre message a été supprimé" })
+                )
+                .catch(() =>
+                  res
+                    .status(500)
+                    .json({ error: "⚠ Oops, une erreur s'est produite !" })
+                );
+            });
+          } else {
+            models.Message.destroy({
+              where: { id: req.params.messagesId },
+            })
+              .then(() =>
+                res
+                  .status(200)
+                  .json({ message: "Votre message a été supprimé" })
+              )
+              .catch(() =>
+                res
+                  .status(500)
+                  .json({ error: "⚠ Oops, une erreur s'est produite !" })
+              );
+          }
+        } else {
+          return res.status(404).json({ error: "Message non trouvé" });
+        }
+      })
+      .catch((error) =>
+        res.status(500).json({ error: "⚠ Oops, une erreur s'est produite !" })
+      );
   },
 };

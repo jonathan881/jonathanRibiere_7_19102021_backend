@@ -141,7 +141,7 @@ module.exports = {
       }
     );
   },
-  //Permet de recup et modifier notre profile
+  //Permet de recup son profile
   getUserProfile: function (req, res) {
     // en-tete de recuperation de nos autorisation
     var headerAuth = req.headers["authorization"];
@@ -150,7 +150,7 @@ module.exports = {
     if (userId < 0) return res.status(400).json({ error: "erreur token" });
 
     models.User.findOne({
-      attributes: ["id", "email", "username"],
+      attributes: ["id", "email", "username", "isAdmin"],
       where: { id: userId },
     })
       .then(function (user) {
@@ -209,7 +209,7 @@ module.exports = {
 
     // Trouver l'utulisateur qui correspond au token
     models.User.findOne({
-      attributes: ["id", "id"],
+      //attributes: ["id", "id"],
       where: { id: userId },
     })
       // Modifier les informations renseignées par l'utilisateur
